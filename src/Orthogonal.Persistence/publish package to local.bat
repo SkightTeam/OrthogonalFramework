@@ -1,0 +1,1 @@
+dotnet nuget push .\bin\Release\*.nupkg -s Local

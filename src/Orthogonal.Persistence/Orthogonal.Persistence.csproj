@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Hao Wang</Authors>
+    <Product>Orthogonal Framework</Product>
+    <Copyright>2020</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl></PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/OrthogonalDesign/OrthogonalFramework</RepositoryUrl>
+    <PackageTags>Framework,Persistence</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.0" />
+    <PackageReference Include="System.Linq.Async" Version="4.1.1" />
+  </ItemGroup>
+
+</Project>

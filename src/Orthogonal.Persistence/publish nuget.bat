@@ -1,0 +1,1 @@
+dotnet nuget push {nuget} -k {apikey} -s https://api.nuget.org/v3/index.json
