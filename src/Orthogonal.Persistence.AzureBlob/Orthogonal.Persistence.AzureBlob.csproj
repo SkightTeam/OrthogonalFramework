@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;</TargetFrameworks>
     <Authors>Hao Wang</Authors>
     <Company>Hao Wang</Company>
     <Product>Orthogonal Framework</Product>
@@ -15,10 +15,6 @@
     <PackageReference Include="Orthogonal.Persistence" Version="1.0.0" />
     <PackageReference Include="System.Linq.Async" Version="4.1.1" />
     <PackageReference Include="System.Text.Json" Version="4.7.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\src\Orthogonal.Persistence\Orthogonal.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

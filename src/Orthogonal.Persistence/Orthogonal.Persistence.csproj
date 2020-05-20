@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1;</TargetFrameworks>
     <Authors>Hao Wang</Authors>
     <Product>Orthogonal Framework</Product>
     <Copyright>2020</Copyright>

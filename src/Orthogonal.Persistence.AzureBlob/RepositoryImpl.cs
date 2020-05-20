@@ -12,18 +12,26 @@ namespace Orthogonal.Persistence.AzureBlob
 {
     public class RepositoryImpl<T> : Repository<T>
     {
+        private BlobClientConfiguration blobClientConfiguration;
         private BlobServiceClient blobServiceClient;
         private string blobContainerName;
 
-        public RepositoryImpl(BlobServiceClient blobServiceClient)
+        public RepositoryImpl( BlobClientConfiguration blobClientConfiguration)
         {
-            this.blobServiceClient = blobServiceClient;
-            blobContainerName = typeof(T).Name;
+            this.blobClientConfiguration = blobClientConfiguration;
+            blobContainerName = typeof(T).Name.ToLower();
         }
 
+        BlobServiceClient BlobServiceClient {
+            get
+            {
+                return blobServiceClient ??
+                       (blobServiceClient = new BlobServiceClient(blobClientConfiguration.ConnectionString));
+            }
+        }
         public async Task<T> get(string id)
         {
-            var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+            var containerClient = BlobServiceClient.GetBlobContainerClient(blobContainerName);
             var blobClient = containerClient.GetBlobClient(id);
             var download = await blobClient.DownloadAsync();
             return await JsonSerializer.DeserializeAsync<T>(download.Value.Content);
@@ -36,9 +44,13 @@ namespace Orthogonal.Persistence.AzureBlob
 
         public  IAsyncEnumerable<T> search<TQuery>() where TQuery : Query<T>
         {
-            if (typeof(TQuery).IsSubclassOf(typeof(FindAll<T>)))
+            if (typeof(TQuery).IsAssignableFrom(typeof(FindAll<T>)))
             {
-                var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+                var containerClient = BlobServiceClient.GetBlobContainerClient(blobContainerName);
+                if (containerClient == null)
+                {
+                    containerClient = BlobServiceClient.CreateBlobContainer(blobContainerName);
+                }
                 var blobs = containerClient.GetBlobsAsync(BlobTraits.Metadata);
                 return blobs.SelectAwait(async x => await get(x.Name));
             }
@@ -51,8 +63,11 @@ namespace Orthogonal.Persistence.AzureBlob
         public async Task save(T data)
         {
             var id = data.GetType().GetProperty("Id").GetValue(data).ToString();
-
-            var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+            var containerClient = BlobServiceClient.GetBlobContainerClient(blobContainerName);
+            if (!containerClient.Exists().Value)
+            {
+                containerClient = BlobServiceClient.CreateBlobContainer(blobContainerName);
+            }
             var blobClient = containerClient.GetBlobClient(id);
             using (var stream = new MemoryStream())
             {
@@ -60,6 +75,13 @@ namespace Orthogonal.Persistence.AzureBlob
                 stream.Position = 0;
                 await blobClient.UploadAsync(stream);
             }
+        }
+
+        public async Task delete(string id)
+        {
+            var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+            var blobClient = containerClient.GetBlobClient(id);
+            await blobClient.DeleteAsync();
         }
     }
 }
