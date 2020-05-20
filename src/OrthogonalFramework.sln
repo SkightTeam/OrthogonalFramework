@@ -12,7 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{F1AF15EA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.AzureBlob", "Orthogonal.Persistence.AzureBlob\Orthogonal.Persistence.AzureBlob.csproj", "{882C4D93-A8CC-4D3A-B3B6-A160B7E6C322}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.AzureBlob.Tests", "Orthogonal.Persistence.AzureBlob.Tests\Orthogonal.Persistence.AzureBlob.Tests.csproj", "{888C5345-D053-4705-8DFD-1B6501935EB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.AzureBlob.Tests", "Orthogonal.Persistence.AzureBlob.Tests\Orthogonal.Persistence.AzureBlob.Tests.csproj", "{888C5345-D053-4705-8DFD-1B6501935EB8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.EventStore", "Orthogonal.Persistence.EventStore\Orthogonal.Persistence.EventStore.csproj", "{445D4C8C-2577-4FAB-9466-4C8BDE7351D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.EventStore.Tests", "Orthogonal.Persistence.EventStore.Tests\Orthogonal.Persistence.EventStore.Tests.csproj", "{F6B54F09-BF1F-4FF3-ABF5-8DCD25819B15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +36,14 @@ Global
 		{888C5345-D053-4705-8DFD-1B6501935EB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{888C5345-D053-4705-8DFD-1B6501935EB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{888C5345-D053-4705-8DFD-1B6501935EB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{445D4C8C-2577-4FAB-9466-4C8BDE7351D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{445D4C8C-2577-4FAB-9466-4C8BDE7351D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{445D4C8C-2577-4FAB-9466-4C8BDE7351D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{445D4C8C-2577-4FAB-9466-4C8BDE7351D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6B54F09-BF1F-4FF3-ABF5-8DCD25819B15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6B54F09-BF1F-4FF3-ABF5-8DCD25819B15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6B54F09-BF1F-4FF3-ABF5-8DCD25819B15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6B54F09-BF1F-4FF3-ABF5-8DCD25819B15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
