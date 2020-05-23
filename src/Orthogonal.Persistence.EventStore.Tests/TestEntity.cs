@@ -47,6 +47,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
 
         private void OnCreated(EntityCreated e)
         {
+            Id = e.Name;
             Name = e.Name;
         }
 

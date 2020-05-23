@@ -21,6 +21,14 @@ namespace Orthogonal.Persistence.EventStore
             get { return pendingEvents; }
         }
 
+        public void events_persisted(IEnumerable<VersionedEvent> events)
+        {
+            foreach (var @event in events)
+            {
+                pendingEvents.Remove(@event);
+            }
+        }
+
         protected void handles<TEvent>(Action<TEvent> handler)
             where TEvent : Event
         {

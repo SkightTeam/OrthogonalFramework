@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using FluentAssertions;
 using Machine.Fakes;
 using Machine.Specifications;
@@ -19,18 +20,18 @@ namespace Orthogonal.Persistence.EventStore.Tests
         };
         private Because of = () =>
         {
-            var entity = new TestEntity("entityName");
-            Subject.save(entity).Wait();
+            entity = new TestEntity(new Random().Next(10000).ToString());
             Subject.save(entity).Wait();
             entity.set(1.2M);
             Subject.save(entity).Wait();
 
-            savedEntity = Subject.get("").Result;
+            savedEntity = Subject.get(entity.Id).Result;
         };
 
-        private It should_save_name = () => savedEntity.Name.Should().Be("entityName");
+        private It should_save_name = () => savedEntity.Name.Should().Be(entity.Name);
         private It should_save_value = () => savedEntity.Value.Should().Be(1.2M);
 
+        private static TestEntity entity;
         private static TestEntity savedEntity;
     }
 }

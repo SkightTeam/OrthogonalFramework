@@ -99,7 +99,7 @@ namespace Orthogonal.Persistence.EventStore
 
         public async Task<T> get(string id)
         {
-            var key = typeof(T).Name + id;
+            var key = generate_key(id);
             var cachedMemento = getMementoFromCache(key);
             if (cachedMemento != null && cachedMemento.Item1 != null)
             {
@@ -159,11 +159,12 @@ namespace Orthogonal.Persistence.EventStore
             var events = t.Events.OrderBy(e => e.Version).ToArray();
             if (events.Length > 0)
             {
-                var key = typeof(T).Name + t.Id;
+                var key = generate_key(t.Id);
                 try
                 {
                     await write_stream(key, events);
                     cacheMementoIfApplicable(key, t);
+                    t.events_persisted(events);
                 }
                 catch (WrongExpectedVersionException)
                 {
@@ -179,19 +180,18 @@ namespace Orthogonal.Persistence.EventStore
                  stream, start, size, false);
         }
 
-        private async Task<bool> write_stream(string stream, VersionedEvent[] events)
+        private async Task write_stream(string stream, VersionedEvent[] events)
         {
             var eventData = events.Select(create_event_data).ToArray();
             await Connection.AppendToStreamAsync(
                 stream, events[0].Version - 1, eventData);
-            return true;
         }
 
         private EventData create_event_data(VersionedEvent versionedEvent)
         {
             return new EventData(
                 Guid.NewGuid(),
-                versionedEvent.GetType().FullName,
+                versionedEvent.GetType().AssemblyQualifiedName,
                 true,
                 Encoding.UTF8.GetBytes(JsonSerializer.Serialize(versionedEvent, versionedEvent.GetType())),
                null);
@@ -205,6 +205,11 @@ namespace Orthogonal.Persistence.EventStore
         public IAsyncEnumerable<T> search<TQuery>() where TQuery : Query<T>
         {
             throw new NotImplementedException();
+        }
+
+        private string generate_key(string id)
+        {
+            return string.Join('-', typeof(T).Name, id);
         }
     }
 }
