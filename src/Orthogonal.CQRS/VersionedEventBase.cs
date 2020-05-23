@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Orthogonal.Persistence.EventStore
+namespace Orthogonal.CQRS
 {
     public abstract class VersionedEventBase : VersionedEvent
     {

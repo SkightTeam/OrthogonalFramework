@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Orthogonal.Persistence.EventStore
+namespace Orthogonal.CQRS
 {
     public abstract class EventSourcedBase : EventSourced
     {

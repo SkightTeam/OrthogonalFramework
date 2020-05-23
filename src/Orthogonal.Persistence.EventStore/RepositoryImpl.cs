@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using EventStore.ClientAPI.Exceptions;
 using Microsoft.Extensions.Caching.Memory;
+using Orthogonal.CQRS;
 
 namespace Orthogonal.Persistence.EventStore
 {

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Orthogonal.Persistence.EventStore
+namespace Orthogonal.CQRS
 {
     public interface Event
     {

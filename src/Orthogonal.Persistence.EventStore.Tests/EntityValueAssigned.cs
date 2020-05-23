@@ -1,4 +1,6 @@
-﻿namespace Orthogonal.Persistence.EventStore.Tests
+﻿using Orthogonal.CQRS;
+
+namespace Orthogonal.Persistence.EventStore.Tests
 {
     public class EntityValueAssigned : VersionedEventBase
     {
