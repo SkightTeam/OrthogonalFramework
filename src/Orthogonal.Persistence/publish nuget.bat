@@ -1,1 +1,1 @@
-dotnet nuget push .\bin\Release\*.nupkg -k oy2ajfuhjhl3b6awuj6as76ijo5xk6ietardocqwhoiuji -s https://api.nuget.org/v3/index.json
+dotnet nuget push .\bin\Release\*.nupkg -k %NugetApiKey% -s https://api.nuget.org/v3/index.json
