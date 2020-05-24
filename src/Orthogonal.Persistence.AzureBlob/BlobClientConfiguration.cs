@@ -7,5 +7,6 @@ namespace Orthogonal.Persistence.AzureBlob
     public interface BlobClientConfiguration
     {
         string ConnectionString { get; }
+        Func<Type,string> NameConvention { get; }
     }
 }

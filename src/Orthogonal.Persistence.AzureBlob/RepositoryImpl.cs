@@ -12,14 +12,20 @@ namespace Orthogonal.Persistence.AzureBlob
 {
     public class RepositoryImpl<T> : Repository<T>
     {
-        private BlobClientConfiguration blobClientConfiguration;
+        private readonly BlobClientConfiguration blobClientConfiguration;
         private BlobServiceClient blobServiceClient;
-        private string blobContainerName;
+        private readonly Func<Type, string> default_name_convention = t => t.Name.ToLower();
+        private string blob_name;
 
-        public RepositoryImpl( BlobClientConfiguration blobClientConfiguration)
+        public RepositoryImpl(BlobClientConfiguration blobClientConfiguration)
         {
             this.blobClientConfiguration = blobClientConfiguration;
-            blobContainerName = typeof(T).Name.ToLower();
+            var name_convention = blobClientConfiguration.NameConvention ?? default_name_convention;
+            blob_name = name_convention(typeof(T)) ;
+            if (string.IsNullOrEmpty(blob_name))
+            {
+                blob_name = default_name_convention(typeof(T));
+            }
         }
 
         BlobServiceClient BlobServiceClient {
@@ -31,7 +37,7 @@ namespace Orthogonal.Persistence.AzureBlob
         }
         public async Task<T> get(string id)
         {
-            var containerClient = BlobServiceClient.GetBlobContainerClient(blobContainerName);
+            var containerClient = BlobServiceClient.GetBlobContainerClient(blob_name);
             var blobClient = containerClient.GetBlobClient(id);
             var download = await blobClient.DownloadAsync();
             return await JsonSerializer.DeserializeAsync<T>(download.Value.Content);
@@ -46,10 +52,10 @@ namespace Orthogonal.Persistence.AzureBlob
         {
             if (typeof(TQuery).IsAssignableFrom(typeof(FindAll<T>)))
             {
-                var containerClient = BlobServiceClient.GetBlobContainerClient(blobContainerName);
+                var containerClient = BlobServiceClient.GetBlobContainerClient(blob_name);
                 if (containerClient == null)
                 {
-                    containerClient = BlobServiceClient.CreateBlobContainer(blobContainerName);
+                    containerClient = BlobServiceClient.CreateBlobContainer(blob_name);
                 }
                 var blobs = containerClient.GetBlobsAsync(BlobTraits.Metadata);
                 return blobs.SelectAwait(async x => await get(x.Name));
@@ -63,10 +69,10 @@ namespace Orthogonal.Persistence.AzureBlob
         public async Task save(T data)
         {
             var id = data.GetType().GetProperty("Id").GetValue(data).ToString();
-            var containerClient = BlobServiceClient.GetBlobContainerClient(blobContainerName);
+            var containerClient = BlobServiceClient.GetBlobContainerClient(blob_name);
             if (!containerClient.Exists().Value)
             {
-                containerClient = BlobServiceClient.CreateBlobContainer(blobContainerName);
+                containerClient = BlobServiceClient.CreateBlobContainer(blob_name);
             }
             var blobClient = containerClient.GetBlobClient(id);
             using (var stream = new MemoryStream())
@@ -79,7 +85,7 @@ namespace Orthogonal.Persistence.AzureBlob
 
         public async Task delete(string id)
         {
-            var containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
+            var containerClient = blobServiceClient.GetBlobContainerClient(blob_name);
             var blobClient = containerClient.GetBlobClient(id);
             await blobClient.DeleteAsync();
         }

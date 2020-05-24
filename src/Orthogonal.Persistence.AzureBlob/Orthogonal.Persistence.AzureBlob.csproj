@@ -8,6 +8,8 @@
     <RepositoryUrl>https://github.com/OrthogonalDesign/OrthogonalFramework</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Framework,Persistence,Azure,Blob</PackageTags>
+    <Version>1.0.1</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
