@@ -8,11 +8,16 @@
     <RepositoryUrl>https://github.com/OrthogonalDesign/OrthogonalFramework</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>Framework,Persistence,Azure,Blob</PackageTags>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.4.2" />
     <PackageReference Include="Orthogonal.Persistence" Version="1.0.0" />
     <PackageReference Include="System.Linq.Async" Version="4.1.1" />
