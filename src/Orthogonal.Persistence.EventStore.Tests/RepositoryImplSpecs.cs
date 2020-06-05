@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using EventStore.ClientAPI;
 using FluentAssertions;
 using Machine.Fakes;
 using Machine.Specifications;
@@ -11,21 +14,29 @@ namespace Orthogonal.Persistence.EventStore.Tests
     {
         private Establish context = () =>
         {
-            var config = An<ConnectionConfiguration>();
-            config.Host.Returns("cloudview-eventstore.koreacentral.azurecontainer.io");
-            config.Port.Returns(1113);
-            config.User.Returns("admin");
-            config.Password.Returns("changeit");
-            Configure(r=>r.For<ConnectionConfiguration>().Use(config));
+             connection =
+               EventStoreConnection.Create(
+                   ConnectionSettings.Create()
+                       .KeepReconnecting()
+                       .KeepRetrying()
+                       .UseConsoleLogger()
+                   ,
+                   new Uri(
+                       $"tcp://admin:changeit@cloudview-eventstore.koreacentral.azurecontainer.io:1113"));
+            Configure(r=>r.For<IEventStoreConnection>().Use(connection));
         };
         private Because of = () =>
         {
-            entity = new TestEntity(new Random().Next(10000).ToString());
-            Subject.save(entity).Wait();
-            entity.set(1.2M);
-            Subject.save(entity).Wait();
-
-            savedEntity = Subject.get(entity.Id).Result;
+            Task.Run(async () =>
+            {
+                await connection.ConnectAsync();
+                await Task.Delay(1000);
+                entity = new TestEntity(new Random().Next(10000).ToString());
+                await Subject.save(entity);
+                entity.set(1.2M);
+                await Subject.save(entity);
+                savedEntity= await Subject.get(entity.Id);
+            }).Wait();
         };
 
         private It should_save_name = () => savedEntity.Name.Should().Be(entity.Name);
@@ -33,5 +44,6 @@ namespace Orthogonal.Persistence.EventStore.Tests
 
         private static TestEntity entity;
         private static TestEntity savedEntity;
+        private static IEventStoreConnection connection;
     }
 }

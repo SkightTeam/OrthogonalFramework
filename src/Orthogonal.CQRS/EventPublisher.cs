@@ -2,7 +2,7 @@
 
 namespace Orthogonal.CQRS
 {
-    interface EventPublisher
+    public interface EventPublisher
     {
         Task publish(Event e);
     }

@@ -14,17 +14,20 @@ namespace Orthogonal.Persistence.EventStore
     public class RepositoryImpl<T> : Repository<T>
         where T : class, EventSourced
     {
-        private readonly ConnectionConfiguration connection_configuration;
+        private readonly IEventStoreConnection event_store_connection;
         private readonly Func<IList<VersionedEvent>, T> entityFactory;
         private readonly Func<Memento, IList<VersionedEvent>, T> originatorEntityFactory;
         private readonly IMemoryCache cache;
         private readonly Action<string, T> cacheMementoIfApplicable;
         private readonly Func<string, Tuple<Memento, DateTime?>> getMementoFromCache;
         private readonly Action<string> markCacheAsStale;
+        private bool is_event_store_connected;
 
-        public RepositoryImpl(ConnectionConfiguration connectionConfiguration, IMemoryCache cache)
+        public RepositoryImpl(IEventStoreConnection eventStoreConnection, IMemoryCache cache)
         {
-            this.connection_configuration = connectionConfiguration;
+            this.event_store_connection = eventStoreConnection;
+            event_store_connection.Connected += on_event_store_connected;
+            event_store_connection.Disconnected += on_event_store_disconnected;
             this.cache = cache;
             // TODO: could be replaced with a compiled lambda to make it more performant
             var constructor = typeof(T).GetConstructor(new[] { typeof(IEnumerable<VersionedEvent>) });
@@ -78,24 +81,14 @@ namespace Orthogonal.Persistence.EventStore
 
         }
 
-        private IEventStoreConnection connection;
-        protected IEventStoreConnection Connection {
-            get
-            {
-                if (connection == null)
-                {
-                    connection = EventStoreConnection.Create(
-                        ConnectionSettings.Create()
-                            .KeepReconnecting()
-                            .KeepRetrying()
-                            .UseConsoleLogger()
-                        ,
-                        new Uri(
-                            $"tcp://{connection_configuration.User}:{connection_configuration.Password}@{connection_configuration.Host}:{connection_configuration.Port}"));
-                    connection.ConnectAsync().Wait();
-                }
-                return connection;
-            }
+        private void on_event_store_disconnected(object sender, ClientConnectionEventArgs e)
+        {
+            is_event_store_connected = false;
+        }
+
+        private void on_event_store_connected(object sender, ClientConnectionEventArgs e)
+        {
+            is_event_store_connected = true;
         }
 
         public async Task<T> get(string id)
@@ -177,14 +170,19 @@ namespace Orthogonal.Persistence.EventStore
 
         private async Task<StreamEventsSlice> read_slice(string stream, long start, int size)
         {
-            return await Connection.ReadStreamEventsForwardAsync(
+            if(!is_event_store_connected)
+                throw new ApplicationException("Event store is not connected.");
+            return await event_store_connection.ReadStreamEventsForwardAsync(
                  stream, start, size, false);
         }
 
         private async Task write_stream(string stream, VersionedEvent[] events)
         {
+            //TODO: if cannot connect to the event store, need cache changes or retry?
+            if (!is_event_store_connected)
+                throw new ApplicationException("Event store is not connected.");
             var eventData = events.Select(create_event_data).ToArray();
-            await Connection.AppendToStreamAsync(
+            await event_store_connection.AppendToStreamAsync(
                 stream, events[0].Version - 1, eventData);
         }
 
