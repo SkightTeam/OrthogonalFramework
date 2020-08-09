@@ -181,19 +181,9 @@ namespace Orthogonal.Persistence.EventStore
             //TODO: if cannot connect to the event store, need cache changes or retry?
             if (!is_event_store_connected)
                 throw new ApplicationException("Event store is not connected.");
-            var eventData = events.Select(create_event_data).ToArray();
+            var eventData = events.Select(x=>x.create_event_data()).ToArray();
             await event_store_connection.AppendToStreamAsync(
                 stream, events[0].Version - 1, eventData);
-        }
-
-        private EventData create_event_data(VersionedEvent versionedEvent)
-        {
-            return new EventData(
-                Guid.NewGuid(),
-                versionedEvent.GetType().AssemblyQualifiedName,
-                true,
-                Encoding.UTF8.GetBytes(JsonSerializer.Serialize(versionedEvent, versionedEvent.GetType())),
-               null);
         }
 
         public IAsyncEnumerable<T> search(Query<T> query)
