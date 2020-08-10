@@ -73,7 +73,7 @@ namespace Orthogonal.Persistence.EventStore
                     var evt = x.extract_data();
                     if (event_handlers.TryGetValue(evt.GetType(), out var handlers))
                     {
-                        Parallel.ForEach(handlers, handler => (handler as dynamic).handle((dynamic) evt));
+                        Parallel.ForEach(handlers, handler => ((dynamic)handler).handle((dynamic) evt));
                     }
                 }
                 catch (Exception e)

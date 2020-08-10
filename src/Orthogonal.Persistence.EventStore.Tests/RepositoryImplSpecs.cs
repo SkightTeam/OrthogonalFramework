@@ -14,7 +14,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
     {
         private Establish context = () =>
         {
-             connection =
+             connection =             
                EventStoreConnection.Create(
                    ConnectionSettings.Create()
                        .KeepReconnecting()
@@ -22,7 +22,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
                        .UseConsoleLogger()
                    ,
                    new Uri(
-                       $"tcp://admin:changeit@cloudview-eventstore.koreacentral.azurecontainer.io:1113"));
+                       $"tcp://admin:changeit@127.0.0.1:1113"));
             Configure(r=>r.For<IEventStoreConnection>().Use(connection));
         };
         private Because of = () =>
@@ -43,7 +43,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
         private It should_save_value = () => savedEntity.Value.Should().Be(1.2M);
 
         private static TestEntity entity;
-        private static TestEntity savedEntity;
+        private static TestEntity savedEntity;                                                                          
         private static IEventStoreConnection connection;
     }
 }
