@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.SystemData;
 using FluentAssertions;
 using Machine.Fakes;
 using Machine.Specifications;
@@ -28,6 +29,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
                    new Uri(
                        $"tcp://admin:changeit@127.0.0.1:1113"));
             Configure(r=>r.For<IEventStoreConnection>().Use(connection));
+            user = new UserCredentials("admin", "changeit");
 
         };
         private Because of = () =>
@@ -38,7 +40,8 @@ namespace Orthogonal.Persistence.EventStore.Tests
                 await Task.Delay(1000);
                 command = new TestCommand(){Name= new Random().Next(10000).ToString() };
                 handler=An<CommandHandler<TestCommand>>();
-                Subject.register(handler); 
+                Subject.register(handler);
+                Subject.create(user);
                 await Subject.start();
                 await Subject.publish(command);
             }).Wait();
@@ -52,5 +55,6 @@ namespace Orthogonal.Persistence.EventStore.Tests
         private static TestCommand command;
         private static CommandHandler<TestCommand> handler;
         private static IEventStoreConnection connection;
+        private static UserCredentials user;
     }
 }

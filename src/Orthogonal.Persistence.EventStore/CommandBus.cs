@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.SystemData;
 using Orthogonal.CQRS;
 
 namespace Orthogonal.Persistence.EventStore
@@ -56,6 +57,32 @@ namespace Orthogonal.Persistence.EventStore
                 Subscribe(event_store_connection);
                 event_store_connection.Connected += OnConnected;
             });
+        }
+
+        public void create(UserCredentials user)
+        {
+            try
+            {
+                var setting = create_subscription();
+                event_store_connection.CreatePersistentSubscriptionAsync(Stream, Subscription, setting, user).Wait();
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerException.GetType() != typeof(InvalidOperationException)
+                    && ex.InnerException?.Message != $"Subscription group {Subscription} on stream {Stream} already exists")
+                {
+                    throw;
+                }
+            }
+               
+            
+        }
+
+        private PersistentSubscriptionSettings create_subscription()
+        {
+           return PersistentSubscriptionSettings.Create()
+                .DoNotResolveLinkTos()
+                .StartFromCurrent();
         }
 
         private void OnConnected(object sender, ClientConnectionEventArgs clientConnectionEventArgs)
