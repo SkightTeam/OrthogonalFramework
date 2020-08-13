@@ -101,7 +101,7 @@ namespace Orthogonal.Persistence.EventStore
                     var command = x.extract_data();
                     if (command_handlers.TryGetValue(command.GetType(), out var handler))
                     {
-                        ((dynamic)handler).handle((dynamic) command);
+                        ((dynamic)handler).handler((dynamic) command);
                     }
                     _.Acknowledge(x.Event.EventId);
                 }
