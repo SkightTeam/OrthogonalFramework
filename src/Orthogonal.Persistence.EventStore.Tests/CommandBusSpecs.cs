@@ -50,7 +50,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
 
         private It should_call_commandHandler = () =>
         {
-            handler.Received().handler(command);
+            handler.Received().handler(Arg.Is<TestCommand>(x=>x.Name==command.Name));
         };
 
         private static TestCommand command;

@@ -59,12 +59,12 @@ namespace Orthogonal.Persistence.EventStore
             });
         }
 
-        public void create(UserCredentials user)
+        public async void create(UserCredentials user)
         {
             try
             {
                 var setting = create_subscription();
-                event_store_connection.CreatePersistentSubscriptionAsync(Stream, Subscription, setting, user).Wait();
+                await event_store_connection.CreatePersistentSubscriptionAsync(Stream, Subscription, setting, user);
             }
             catch (AggregateException ex)
             {
@@ -82,7 +82,7 @@ namespace Orthogonal.Persistence.EventStore
         {
            return PersistentSubscriptionSettings.Create()
                 .DoNotResolveLinkTos()
-                .StartFromCurrent();
+                .StartFromBeginning();
         }
 
         private void OnConnected(object sender, ClientConnectionEventArgs clientConnectionEventArgs)
