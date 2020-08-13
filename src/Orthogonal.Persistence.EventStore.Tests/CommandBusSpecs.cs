@@ -39,7 +39,8 @@ namespace Orthogonal.Persistence.EventStore.Tests
                 await connection.ConnectAsync();
                 await Task.Delay(1000);
                 command = new TestCommand(){Name= new Random().Next(10000).ToString() };
-                handler=An<CommandHandler<TestCommand>>();
+                handler=An<TestCommandHandler>();
+               
                 Subject.register(handler);
                 Subject.create(user);
                 await Subject.start();
@@ -49,7 +50,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
 
         private It should_call_commandHandler = () =>
         {
-            handler.Received().handler(Arg.Is<TestCommand>(x => x.Name == command.Name));
+            handler.Received().handler(command);
         };
 
         private static TestCommand command;
