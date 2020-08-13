@@ -59,7 +59,7 @@ namespace Orthogonal.Persistence.EventStore
             });
         }
 
-        public async void create(UserCredentials user)
+        public async Task create(UserCredentials user)
         {
             try
             {
