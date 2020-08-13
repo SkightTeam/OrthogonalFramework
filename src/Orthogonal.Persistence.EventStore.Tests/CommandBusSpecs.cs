@@ -46,12 +46,12 @@ namespace Orthogonal.Persistence.EventStore.Tests
                 await Subject.start();
                 await Subject.publish(command);
             }).Wait();
+            Thread.Sleep(500);
         };
 
         private It should_call_commandHandler = () =>
         {
-            handler.Received().handler(Arg.Is<TestCommand>(x=>x.Name==command.Name));
-        };
+              handler.Received().handler(Arg.Is<TestCommand>(x=>x.Name==command.Name));        };
 
         private static TestCommand command;
         private static CommandHandler<TestCommand> handler;
