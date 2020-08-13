@@ -42,7 +42,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
                 handler=An<TestCommandHandler>();
                
                 Subject.register(handler);
-                Subject.create(user);
+                await Subject.create(user);
                 await Subject.start();
                 await Subject.publish(command);
             }).Wait();

@@ -59,17 +59,17 @@ namespace Orthogonal.Persistence.EventStore
             });
         }
 
-        public async void create(UserCredentials user)
+        public async Task create(UserCredentials user)
         {
             try
             {
                 var setting = create_subscription();
                 await event_store_connection.CreatePersistentSubscriptionAsync(Stream, Subscription, setting, user);
             }
-            catch (AggregateException ex)
+            catch (Exception ex)
             {
-                if (ex.InnerException.GetType() != typeof(InvalidOperationException)
-                    && ex.InnerException?.Message != $"Subscription group {Subscription} on stream {Stream} already exists")
+                if (ex.GetType() != typeof(InvalidOperationException)
+                    && ex.Message != $"Subscription group {Subscription} on stream {Stream} already exists")
                 {
                     throw;
                 }
