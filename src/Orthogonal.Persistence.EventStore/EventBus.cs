@@ -12,7 +12,7 @@ using EventHandler = Orthogonal.CQRS.EventHandler;
 
 namespace Orthogonal.Persistence.EventStore
 {
-    public class EventBus  : EventPublisher, EventHandlerRegistry
+    public class EventBus  : EventHandlerRegistry
     {
         private static string Stream = "EventBus";
         private static string Subscription = "EventReceive";
@@ -23,15 +23,6 @@ namespace Orthogonal.Persistence.EventStore
         {
             this.manager = manager;
             event_handlers=new ConcurrentDictionary<Type, ICollection<EventHandler>>();
-        }
-
-
-        public async Task publish(params Event[] events)
-        {
-            await manager.Connection.AppendToStreamAsync(
-                Stream,
-                ExpectedVersion.Any,
-                events.Select(x=>x.create_event_data()).ToArray());
         }
 
         public void register(EventHandler handler)
@@ -55,7 +46,7 @@ namespace Orthogonal.Persistence.EventStore
         public async Task create()
         {
             var projections = await manager.ProjectionsManager.ListContinuousAsync(manager.Admin);
-            if (projections.All(x => x.Name != Stream))
+            if (projections.All(x => x.Name != Projection))
             {
                 await manager
                     .ProjectionsManager
@@ -74,12 +65,15 @@ namespace Orthogonal.Persistence.EventStore
 
         private string query =
             @"fromAll()
-                .when(
-                    function(s, e) {
-                    if(e.eventType && !e.eventType.startsWith('$')) {
-                         linkTo('{Stream}')
+                .when({
+                    $any: function(s, e) {
+                    if( e.streamId !='EventBus' 
+                        && e.streamId != 'CommandBus'
+                        && e.eventType 
+                        && !e.eventType.startsWith('$')) {
+                         linkTo('{Stream}', e)
                     }
-                })";
+                }})";
 
         private PersistentSubscriptionSettings create_subscription()
         {

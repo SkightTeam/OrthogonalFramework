@@ -15,8 +15,6 @@ namespace Orthogonal.Persistence.EventStore
         where T : class, EventSourced
     {
         private readonly IEventStoreConnection event_store_connection;
-        private readonly Manager manager;
-        private readonly EventPublisher event_publisher;
         private readonly Func<IList<VersionedEvent>, T> entityFactory;
         private readonly Func<Memento, IList<VersionedEvent>, T> originatorEntityFactory;
         private readonly IMemoryCache cache;
@@ -27,15 +25,12 @@ namespace Orthogonal.Persistence.EventStore
 
         public RepositoryImpl(
             Manager manager,
-            EventPublisher eventPublisher,
             IMemoryCache cache)
         {
-            this.manager = manager;
             event_store_connection = manager.Connection;
             event_store_connection.Connected += on_event_store_connected;
             event_store_connection.Disconnected += on_event_store_disconnected;
             this.cache = cache;
-            event_publisher = eventPublisher;
             // TODO: could be replaced with a compiled lambda to make it more performant
             var constructor = typeof(T).GetConstructor(new[] { typeof(IEnumerable<VersionedEvent>) });
             if (constructor == null)
@@ -191,7 +186,6 @@ namespace Orthogonal.Persistence.EventStore
             var eventData = events.Select(x=>x.create_event_data()).ToArray();
             await event_store_connection.AppendToStreamAsync(
                 stream, events[0].Version - 1, eventData);
-            await event_publisher.publish(events);
         }
 
         public IAsyncEnumerable<T> search(Query<T> query)

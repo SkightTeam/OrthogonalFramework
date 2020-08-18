@@ -32,7 +32,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
             var manager =new Manager(configuration);
             
             Configure(r=>r.For<Manager>().Use(manager));
-            repository=new RepositoryImpl<TestEntity>(manager, Subject, An<IMemoryCache>());
+            repository=new RepositoryImpl<TestEntity>(manager, An<IMemoryCache>());
 
             Task.Run(async () =>
             {
