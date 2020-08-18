@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.Projections;
 using EventStore.ClientAPI.SystemData;
 using Orthogonal.CQRS;
 using EventHandler = Orthogonal.CQRS.EventHandler;
@@ -15,19 +16,19 @@ namespace Orthogonal.Persistence.EventStore
     {
         private static string Stream = "EventBus";
         private static string Subscription = "EventReceive";
+        private static string Projection = "EventProjection";
         private ConcurrentDictionary<Type, ICollection<EventHandler>> event_handlers;
-        private readonly IEventStoreConnection event_store_connection;
-
-        public EventBus(IEventStoreConnection eventStoreConnection)
+        private readonly Manager manager;
+        public EventBus(Manager manager)
         {
-            event_store_connection = eventStoreConnection;
+            this.manager = manager;
             event_handlers=new ConcurrentDictionary<Type, ICollection<EventHandler>>();
         }
 
 
         public async Task publish(params Event[] events)
         {
-            await event_store_connection.AppendToStreamAsync(
+            await manager.Connection.AppendToStreamAsync(
                 Stream,
                 ExpectedVersion.Any,
                 events.Select(x=>x.create_event_data()).ToArray());
@@ -51,22 +52,34 @@ namespace Orthogonal.Persistence.EventStore
         }
 
 
-        public async Task create(UserCredentials user)
+        public async Task create()
         {
-            try
+            var projections = await manager.ProjectionsManager.ListContinuousAsync(manager.Admin);
+            if (projections.All(x => x.Name != Stream))
+            {
+                await manager
+                    .ProjectionsManager
+                    .CreateContinuousAsync(Projection, query.Replace("{Stream}", Stream), manager.Admin);
+            }
+
+            var subscriptions = await manager.PersistentSubscriptionsManager.List(manager.Admin);
+            if (subscriptions.All(x => x.GroupName != Subscription))
             {
                 var setting = create_subscription();
-                await event_store_connection.CreatePersistentSubscriptionAsync(Stream, Subscription, setting, user);
-            }
-            catch (Exception ex)
-            {
-                if (ex.GetType() != typeof(InvalidOperationException)
-                    || ex.Message != $"Subscription group {Subscription} on stream {Stream} already exists")
-                {
-                    throw;
-                }
+                await manager.Connection.CreatePersistentSubscriptionAsync(Stream, Subscription, setting, manager.Admin);
+
+
             }
         }
+
+        private string query =
+            @"fromAll()
+                .when(
+                    function(s, e) {
+                    if(e.eventType && !e.eventType.startsWith('$')) {
+                         linkTo('{Stream}')
+                    }
+                })";
 
         private PersistentSubscriptionSettings create_subscription()
         {
@@ -79,8 +92,8 @@ namespace Orthogonal.Persistence.EventStore
         {
             await Task.Run(() =>
             {
-                Subscribe(event_store_connection);
-                event_store_connection.Connected += OnConnected;
+                Subscribe(manager.Connection);
+                manager.Connection.Connected += OnConnected;
             });
         }
 

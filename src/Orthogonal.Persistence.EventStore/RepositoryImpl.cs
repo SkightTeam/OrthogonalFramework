@@ -15,6 +15,7 @@ namespace Orthogonal.Persistence.EventStore
         where T : class, EventSourced
     {
         private readonly IEventStoreConnection event_store_connection;
+        private readonly Manager manager;
         private readonly EventPublisher event_publisher;
         private readonly Func<IList<VersionedEvent>, T> entityFactory;
         private readonly Func<Memento, IList<VersionedEvent>, T> originatorEntityFactory;
@@ -25,11 +26,12 @@ namespace Orthogonal.Persistence.EventStore
         private bool is_event_store_connected;
 
         public RepositoryImpl(
-            IEventStoreConnection eventStoreConnection,
+            Manager manager,
             EventPublisher eventPublisher,
             IMemoryCache cache)
         {
-            this.event_store_connection = eventStoreConnection;
+            this.manager = manager;
+            event_store_connection = manager.Connection;
             event_store_connection.Connected += on_event_store_connected;
             event_store_connection.Disconnected += on_event_store_disconnected;
             this.cache = cache;

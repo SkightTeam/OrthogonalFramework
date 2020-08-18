@@ -21,26 +21,26 @@ namespace Orthogonal.Persistence.EventStore.Tests
     {
         private Establish context = () =>
         {
-             connection =             
-               EventStoreConnection.Create(
-                   ConnectionSettings.Create()
-                       .KeepReconnecting()
-                       .KeepRetrying()
-                       .UseConsoleLogger()
-                   ,
-                   new Uri(
-                       $"tcp://admin:changeit@127.0.0.1:1113"));
-            Configure(r=>r.For<IEventStoreConnection>().Use(connection));
-            repository=new RepositoryImpl<TestEntity>(connection, Subject, An<IMemoryCache>());
-            user = new UserCredentials("admin", "changeit");
-          
+            var configuration = An<Configuration>();
+            configuration.Server.Host.Returns("127.0.0.1");
+            configuration.Server.TcpPort.Returns(1113);
+            configuration.Server.HttpPort.Returns(2113);
+            configuration.Admin.Name.Returns("admin");
+            configuration.Admin.Password.Returns("changeit");
+            configuration.Operator.Name.Returns("ops");
+            configuration.Operator.Password.Returns("changeit");
+            var manager =new Manager(configuration);
+            
+            Configure(r=>r.For<Manager>().Use(manager));
+            repository=new RepositoryImpl<TestEntity>(manager, Subject, An<IMemoryCache>());
+
             Task.Run(async () =>
             {
-                await connection.ConnectAsync();
+                await manager.Connection.ConnectAsync();
                 await Task.Delay(1000);
                 handler=An<CQRS.EventHandler<EntityCreated>>();
                 Subject.register(handler);
-                await Subject.create(user);
+                await Subject.create();
                 await Subject.start();
                 
             }).Wait();
@@ -64,7 +64,6 @@ namespace Orthogonal.Persistence.EventStore.Tests
 
         private static TestEntity entity;
         private static CQRS.EventHandler<EntityCreated> handler;
-        private static IEventStoreConnection connection;
         private static UserCredentials user;
         private static RepositoryImpl<TestEntity> repository;
     }
