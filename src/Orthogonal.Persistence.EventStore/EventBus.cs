@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.SystemData;
 using Orthogonal.CQRS;
 using EventHandler = Orthogonal.CQRS.EventHandler;
 
@@ -23,12 +24,13 @@ namespace Orthogonal.Persistence.EventStore
             event_handlers=new ConcurrentDictionary<Type, ICollection<EventHandler>>();
         }
 
-        public async Task publish(Event evt)
+
+        public async Task publish(params Event[] events)
         {
             await event_store_connection.AppendToStreamAsync(
                 Stream,
                 ExpectedVersion.Any,
-                evt.create_event_data());
+                events.Select(x=>x.create_event_data()).ToArray());
         }
 
         public void register(EventHandler handler)
@@ -46,6 +48,31 @@ namespace Orthogonal.Persistence.EventStore
                 var type_handlers = event_handlers.GetOrAdd(type, x=> new HashSet<EventHandler>());
                 type_handlers.Add(handler);
             }
+        }
+
+
+        public async Task create(UserCredentials user)
+        {
+            try
+            {
+                var setting = create_subscription();
+                await event_store_connection.CreatePersistentSubscriptionAsync(Stream, Subscription, setting, user);
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetType() != typeof(InvalidOperationException)
+                    || ex.Message != $"Subscription group {Subscription} on stream {Stream} already exists")
+                {
+                    throw;
+                }
+            }
+        }
+
+        private PersistentSubscriptionSettings create_subscription()
+        {
+            return PersistentSubscriptionSettings.Create()
+                .ResolveLinkTos()
+                .StartFromBeginning();
         }
 
         public async Task start()

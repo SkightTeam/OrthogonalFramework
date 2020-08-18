@@ -4,6 +4,6 @@ namespace Orthogonal.CQRS
 {
     public interface EventPublisher
     {
-        Task publish(Event e);
+        Task publish(params Event[] events);
     }
 }

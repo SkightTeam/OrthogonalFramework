@@ -23,12 +23,12 @@ namespace Orthogonal.Persistence.EventStore
             command_handlers =new ConcurrentDictionary<Type, CommandHandler>();
         }
 
-        public async Task publish(Command command)
+        public async Task publish(params Command[] commands)
         {
            await event_store_connection.AppendToStreamAsync(
                 Stream,
                 ExpectedVersion.Any,
-                command.create_event_data());
+                commands.Select(x=>x.create_event_data()).ToArray());
         }
 
         public void register(CommandHandler handler)
@@ -69,7 +69,7 @@ namespace Orthogonal.Persistence.EventStore
             catch (Exception ex)
             {
                 if (ex.GetType() != typeof(InvalidOperationException)
-                    && ex.Message != $"Subscription group {Subscription} on stream {Stream} already exists")
+                    || ex.Message != $"Subscription group {Subscription} on stream {Stream} already exists")
                 {
                     throw;
                 }
