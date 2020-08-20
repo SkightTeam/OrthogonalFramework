@@ -14,9 +14,10 @@ namespace Orthogonal.Persistence.EventStore
     public class RepositoryImpl<T> : Repository<T>
         where T : class, EventSourced
     {
+        private readonly Manager manager;
         private readonly IEventStoreConnection event_store_connection;
-        private readonly Func<IList<VersionedEvent>, T> entityFactory;
-        private readonly Func<Memento, IList<VersionedEvent>, T> originatorEntityFactory;
+        private readonly Func<IAsyncEnumerable<VersionedEvent>, T> entityFactory;
+        private readonly Func<Memento, IAsyncEnumerable<VersionedEvent>, T> originatorEntityFactory;
         private readonly IMemoryCache cache;
         private readonly Action<string, T> cacheMementoIfApplicable;
         private readonly Func<string, Tuple<Memento, DateTime?>> getMementoFromCache;
@@ -27,12 +28,13 @@ namespace Orthogonal.Persistence.EventStore
             Manager manager,
             IMemoryCache cache)
         {
+            this.manager = manager;
             event_store_connection = manager.Connection;
             event_store_connection.Connected += on_event_store_connected;
             event_store_connection.Disconnected += on_event_store_disconnected;
             this.cache = cache;
             // TODO: could be replaced with a compiled lambda to make it more performant
-            var constructor = typeof(T).GetConstructor(new[] { typeof(IEnumerable<VersionedEvent>) });
+            var constructor = typeof(T).GetConstructor(new[] { typeof(IAsyncEnumerable<VersionedEvent>) });
             if (constructor == null)
             {
                 throw new InvalidCastException(
@@ -43,7 +45,7 @@ namespace Orthogonal.Persistence.EventStore
             if (typeof(MementoOriginator).IsAssignableFrom(typeof(T)) && this.cache != null)
             {
                 // TODO: could be replaced with a compiled lambda to make it more performant
-                var mementoConstructor = typeof(T).GetConstructor(new[] { typeof(Memento), typeof(IEnumerable<VersionedEvent>) });
+                var mementoConstructor = typeof(T).GetConstructor(new[] { typeof(Memento), typeof(IAsyncEnumerable<VersionedEvent>) });
                 if (mementoConstructor == null)
                 {
                     throw new InvalidCastException(
@@ -99,10 +101,10 @@ namespace Orthogonal.Persistence.EventStore
             var cachedMemento = getMementoFromCache(key);
             if (cachedMemento != null && cachedMemento.Item1 != null)
             {
-                IList<VersionedEvent> deserialized;
+                IAsyncEnumerable<VersionedEvent> deserialized;
                 if (!cachedMemento.Item2.HasValue || cachedMemento.Item2.Value < DateTime.UtcNow.AddSeconds(-1))
                 {
-                    deserialized = await read_stream(key, cachedMemento.Item1.Version + 1);
+                    deserialized =  read_stream(key, cachedMemento.Item1.Version + 1);
                 }
                 else
                 {
@@ -111,26 +113,20 @@ namespace Orthogonal.Persistence.EventStore
                     // getting the new events from the EventStore since the last memento was created. In the low probable case
                     // where we get an exception on save, then we mark the cache item as stale so when the command gets
                     // reprocessed, this time we get the new events from the EventStore.
-                    deserialized = new List<VersionedEvent>();
+                    deserialized = AsyncEnumerable.Empty<VersionedEvent>();
                 }
-
                 return originatorEntityFactory.Invoke(cachedMemento.Item1, deserialized);
             }
             else
             {
-                var deserialized = await read_stream(key, 0);
-                if (deserialized.Any())
-                {
-                    return entityFactory.Invoke(deserialized);
-                }
+                var deserialized =  read_stream(key, 0);
+                return entityFactory.Invoke(deserialized);
             }
-            return default;
         }
 
-        private async Task<List<VersionedEvent>> read_stream(string key, long cursor)
+        private async IAsyncEnumerable<VersionedEvent> read_stream(string key, long cursor)
         {
             bool isEnd;
-            var domainEvents = new List<VersionedEvent>();
             do
             {
                 var slice = await read_slice(key, cursor, 100);
@@ -139,14 +135,12 @@ namespace Orthogonal.Persistence.EventStore
                     var type = Type.GetType(e.Event.EventType);
                     var data = Encoding.UTF8.GetString(e.Event.Data);
                     var domainEvent = (VersionedEvent)JsonSerializer.Deserialize(data, type);
-                    domainEvents.Add(domainEvent);
+                    yield return domainEvent;
                 }
 
                 isEnd = slice.IsEndOfStream;
                 cursor = slice.NextEventNumber;
             } while (!isEnd);
-
-            return domainEvents;
         }
 
         public async Task save(T t)

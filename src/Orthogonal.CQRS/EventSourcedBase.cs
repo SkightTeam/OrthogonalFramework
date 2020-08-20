@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Orthogonal.CQRS
 {
@@ -35,9 +36,9 @@ namespace Orthogonal.CQRS
             this.handlers.Add(typeof(TEvent), @event => handler((TEvent)@event));
         }
 
-        protected void load_from(IEnumerable<VersionedEvent> pastEvents)
+        protected async Task load_from(IAsyncEnumerable<VersionedEvent> pastEvents)
         {
-            foreach (var e in pastEvents)
+            await foreach (var e in pastEvents)
             {
                 this.handlers[e.GetType()].Invoke(e);
                 this.version = e.Version;

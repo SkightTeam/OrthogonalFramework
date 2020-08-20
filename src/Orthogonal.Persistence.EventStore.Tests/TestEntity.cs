@@ -26,18 +26,19 @@ namespace Orthogonal.Persistence.EventStore.Tests
         }
 
         #region event sourcing
-        public TestEntity(IEnumerable<VersionedEvent> history) : this()
+        public TestEntity(IAsyncEnumerable<VersionedEvent> history) : this()
         {
             load_from(history);
         }
 
-        public TestEntity(Memento memento, IEnumerable<VersionedEvent> history) : this()
+        public TestEntity(Memento memento, IAsyncEnumerable<VersionedEvent> history) : this()
         {
             var state = (TestEntityMemento)memento;
             Id = state.Id;
             Name = state.Name;
             Value = state.Value;
             Version = state.Version;
+            load_from(history);
         }
 
         protected TestEntity()

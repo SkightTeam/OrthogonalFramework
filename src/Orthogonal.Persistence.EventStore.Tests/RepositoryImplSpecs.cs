@@ -14,22 +14,24 @@ namespace Orthogonal.Persistence.EventStore.Tests
     {
         private Establish context = () =>
         {
-             connection =             
-               EventStoreConnection.Create(
-                   ConnectionSettings.Create()
-                       .KeepReconnecting()
-                       .KeepRetrying()
-                       .UseConsoleLogger()
-                   ,
-                   new Uri(
-                       $"tcp://admin:changeit@127.0.0.1:1113"));
-            Configure(r=>r.For<IEventStoreConnection>().Use(connection));
+            var configuration = An<Configuration>();
+            configuration.Server.Host.Returns("127.0.0.1");
+            configuration.Server.TcpPort.Returns(1113);
+            configuration.Server.HttpPort.Returns(2113);
+            configuration.Admin.Name.Returns("admin");
+            configuration.Admin.Password.Returns("changeit");
+            configuration.Operator.Name.Returns("ops");
+            configuration.Operator.Password.Returns("changeit");
+            manager =new Manager(configuration);
+            
+            Configure(r=>r.For<Manager>().Use(manager));
+           
         };
         private Because of = () =>
         {
             Task.Run(async () =>
             {
-                await connection.ConnectAsync();
+                await manager.Connection.ConnectAsync();
                 await Task.Delay(1000);
                 entity = new TestEntity(new Random().Next(10000).ToString());
                 await Subject.save(entity);
@@ -43,7 +45,7 @@ namespace Orthogonal.Persistence.EventStore.Tests
         private It should_save_value = () => savedEntity.Value.Should().Be(1.2M);
 
         private static TestEntity entity;
-        private static TestEntity savedEntity;                                                                          
-        private static IEventStoreConnection connection;
+        private static TestEntity savedEntity;
+        private static Manager manager;
     }
 }
