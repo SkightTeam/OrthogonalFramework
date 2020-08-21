@@ -187,7 +187,7 @@ namespace Orthogonal.Persistence.EventStore
             if(!is_event_store_connected)
                 throw new ApplicationException("Event store is not connected.");
             return await event_store_connection.ReadStreamEventsForwardAsync(
-                 stream, start, size, false);
+                 stream, start, size, true);
         }
 
         private async Task write_stream(string stream, VersionedEvent[] events)
