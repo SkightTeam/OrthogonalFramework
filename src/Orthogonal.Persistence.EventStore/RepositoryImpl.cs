@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -12,7 +13,7 @@ using Orthogonal.CQRS;
 namespace Orthogonal.Persistence.EventStore
 {
     public class RepositoryImpl<T> : Repository<T>
-        where T : class, EventSourced
+        where T : class
     {
         private readonly Manager manager;
         private readonly IEventStoreConnection event_store_connection;
@@ -34,53 +35,62 @@ namespace Orthogonal.Persistence.EventStore
             event_store_connection.Disconnected += on_event_store_disconnected;
             this.cache = cache;
             // TODO: could be replaced with a compiled lambda to make it more performant
-            var constructor = typeof(T).GetConstructor(new[] { typeof(IAsyncEnumerable<VersionedEvent>) });
-            if (constructor == null)
+            if(typeof(EventSourced).IsAssignableFrom(typeof(T)))
             {
-                throw new InvalidCastException(
-                    $"Type {typeof(T)} must have a constructor with the following signature: .ctor(Guid, IEnumerable<IVersionedEvent>)");
-            }
-            entityFactory = (events) => (T)constructor.Invoke(new object[] { events });
 
-            if (typeof(MementoOriginator).IsAssignableFrom(typeof(T)) && this.cache != null)
-            {
-                // TODO: could be replaced with a compiled lambda to make it more performant
-                var mementoConstructor = typeof(T).GetConstructor(new[] { typeof(Memento), typeof(IAsyncEnumerable<VersionedEvent>) });
-                if (mementoConstructor == null)
+
+                var constructor = typeof(T).GetConstructor(new[] {typeof(IAsyncEnumerable<VersionedEvent>)});
+                if (constructor == null)
                 {
                     throw new InvalidCastException(
-                        "Type T must have a constructor with the following signature: .ctor(Guid, IMemento, IEnumerable<IVersionedEvent>)");
+                        $"Type {typeof(T)} must have a constructor with the following signature: .ctor(Guid, IEnumerable<IVersionedEvent>)");
                 }
-                this.originatorEntityFactory = (memento, events) => (T)mementoConstructor.Invoke(new object[] { memento, events });
-                this.cacheMementoIfApplicable = (key, originator) =>
-                {
-                    var memento = ((MementoOriginator)originator).save_to_memento();
-                    this.cache.Set(
-                        key,
-                        new Tuple<Memento, DateTime?>(memento, DateTime.UtcNow),
-                        DateTimeOffset.UtcNow.AddMinutes(30));
-                };
-                this.getMementoFromCache = key => (Tuple<Memento, DateTime?>)this.cache.Get(key);
-                this.markCacheAsStale = key =>
-                {
 
-                    var item = (Tuple<Memento, DateTime?>)this.cache.Get(key);
-                    if (item != null && item.Item2.HasValue)
+                entityFactory = (events) => (T) constructor.Invoke(new object[] {events});
+
+                if (typeof(MementoOriginator).IsAssignableFrom(typeof(T)) && this.cache != null)
+                {
+                    // TODO: could be replaced with a compiled lambda to make it more performant
+                    var mementoConstructor = typeof(T).GetConstructor(new[]
+                        {typeof(Memento), typeof(IAsyncEnumerable<VersionedEvent>)});
+                    if (mementoConstructor == null)
                     {
-                        item = new Tuple<Memento, DateTime?>(item.Item1, null);
+                        throw new InvalidCastException(
+                            "Type T must have a constructor with the following signature: .ctor(Guid, IMemento, IEnumerable<IVersionedEvent>)");
+                    }
+
+                    this.originatorEntityFactory = (memento, events) =>
+                        (T) mementoConstructor.Invoke(new object[] {memento, events});
+                    this.cacheMementoIfApplicable = (key, originator) =>
+                    {
+                        var memento = ((MementoOriginator) originator).save_to_memento();
                         this.cache.Set(
                             key,
-                            item,
+                            new Tuple<Memento, DateTime?>(memento, DateTime.UtcNow),
                             DateTimeOffset.UtcNow.AddMinutes(30));
-                    }
-                };
-            }
-            else
-            {
-                // if no cache object or is not a cache originator, then no-op
-                this.cacheMementoIfApplicable = (key, value) => { };
-                this.getMementoFromCache = id => null;
-                this.markCacheAsStale = id => { };
+                    };
+                    this.getMementoFromCache = key => (Tuple<Memento, DateTime?>) this.cache.Get(key);
+                    this.markCacheAsStale = key =>
+                    {
+
+                        var item = (Tuple<Memento, DateTime?>) this.cache.Get(key);
+                        if (item != null && item.Item2.HasValue)
+                        {
+                            item = new Tuple<Memento, DateTime?>(item.Item1, null);
+                            this.cache.Set(
+                                key,
+                                item,
+                                DateTimeOffset.UtcNow.AddMinutes(30));
+                        }
+                    };
+                }
+                else
+                {
+                    // if no cache object or is not a cache originator, then no-op
+                    this.cacheMementoIfApplicable = (key, value) => { };
+                    this.getMementoFromCache = id => null;
+                    this.markCacheAsStale = id => { };
+                }
             }
 
         }
@@ -124,12 +134,13 @@ namespace Orthogonal.Persistence.EventStore
             }
         }
 
-        private async IAsyncEnumerable<VersionedEvent> read_stream(string key, long cursor)
+        private async IAsyncEnumerable<VersionedEvent> read_stream(string stream, long start)
         {
             bool isEnd;
+            var cursor = start;
             do
             {
-                var slice = await read_slice(key, cursor, 100);
+                var slice = await read_slice(stream, cursor, 100);
                 foreach (var e in slice.Events)
                 {
                     var type = Type.GetType(e.Event.EventType);
@@ -146,21 +157,28 @@ namespace Orthogonal.Persistence.EventStore
         public async Task save(T t)
         {
             // TODO: guarantee that only incremental versions of the event are stored
-            var events = t.Events.OrderBy(e => e.Version).ToArray();
-            if (events.Length > 0)
+            if (t is EventSourced sourced)
             {
-                var key = generate_key(t.Id);
-                try
+                var events = sourced.Events.OrderBy(e => e.Version).ToArray();
+                if (events.Length > 0)
                 {
-                    await write_stream(key, events);
-                    cacheMementoIfApplicable(key, t);
-                    t.events_persisted(events);
+                    var key = generate_key(sourced.Id);
+                    try
+                    {
+                        await write_stream(key, events);
+                        cacheMementoIfApplicable(key, t);
+                        sourced.events_persisted(events);
+                    }
+                    catch (WrongExpectedVersionException)
+                    {
+                        markCacheAsStale(key);
+                        throw;
+                    }
                 }
-                catch (WrongExpectedVersionException)
-                {
-                    markCacheAsStale(key);
-                    throw;
-                }
+            }
+            else
+            {
+                throw new NotSupportedException($"The class {t.GetHashCode()} is not supported by event store repository.");
             }
         }
 
@@ -184,7 +202,15 @@ namespace Orthogonal.Persistence.EventStore
 
         public IAsyncEnumerable<T> search(Query<T> query)
         {
-            throw new NotImplementedException();
+            switch (query)
+            {
+                case QueryByEvents<T> queryByEvents:
+                    var events = read_stream("EventBus", 0);
+                    return  queryByEvents.apply(events);
+                default:
+                    throw new NotSupportedException($"Not supported query type  {query.GetType()}");
+
+            }
         }
 
         public IAsyncEnumerable<T> search<TQuery>() where TQuery : Query<T>
