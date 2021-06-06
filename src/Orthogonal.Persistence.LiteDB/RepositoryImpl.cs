@@ -21,16 +21,22 @@ namespace Orthogonal.Persistence.LiteDB
         {
             using var db = new LiteDatabase(configuration.DatabaseLoclation);
             var col = db.GetCollection<T>();
+            IEnumerable<T> result;
             switch (query)
             {
                 case LinqQuery<T> linqQuery:
-                    foreach (var item in col.Find(linqQuery.Predicate))
-                    {
-                        yield return item;
-                    }
+                    result = col.Find(linqQuery.Predicate);
+                    break;
+                case LiteQuery<T> liteQuery:
+                    result= liteQuery.Filter(col.Query()).ToEnumerable();
                     break;
                 default:
                     yield break;
+            }
+
+            foreach (var item in result)
+            {
+                yield return item;
             }
         }
 
