@@ -5,6 +5,8 @@
     <Authors>Hao Wang</Authors>
     <Company>Hao Wang</Company>
     <Product>Orthogonal Framework</Product>
+    <Version>1.0.1</Version>
+    <PackageReleaseNotes>Repository Search by ILiteQueryable</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
