@@ -19,7 +19,7 @@ namespace Orthogonal.Persistence.LiteDB
 
         public async IAsyncEnumerable<T> search(Query<T> query)
         {
-            using var db = new LiteDatabase(configuration.DatabaseLoclation);
+            using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
             var col = db.GetCollection<T>();
             IEnumerable<T> result;
             switch (query)
@@ -49,7 +49,7 @@ namespace Orthogonal.Persistence.LiteDB
         {
             await Task.Run(() =>
            {
-               using var db = new LiteDatabase(configuration.DatabaseLoclation);
+               using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
                var col = db.GetCollection<T>();
                col.Upsert(entity);
            });

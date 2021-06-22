@@ -15,7 +15,7 @@ namespace Orthogonal.Persistence.LiteDB.Tests
                 Name = "Property1",
                 Value = 2
             };
-            NewEntity1 = new TestEntity
+            NewEntity2 = new TestEntity
             {
                 Id = "T002",
                 Name = "Property1",
@@ -23,6 +23,9 @@ namespace Orthogonal.Persistence.LiteDB.Tests
             };
             Subject
                 .save(NewEntity1)
+                .Wait();
+            Subject
+                .save(NewEntity2)
                 .Wait();
         };
 
