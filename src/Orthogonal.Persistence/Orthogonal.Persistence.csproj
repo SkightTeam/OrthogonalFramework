@@ -12,6 +12,9 @@
     <PackageTags>Framework,Persistence</PackageTags>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <PackageReleaseNotes>Support Guid as entity id by adding Get(Guid id)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
-﻿using LiteDB;
+﻿using System;
+using LiteDB;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,7 +15,16 @@ namespace Orthogonal.Persistence.LiteDB
 
         public Task<T> get(string id)
         {
-            throw new System.NotImplementedException();
+            using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
+            var col = db.GetCollection<T>();
+            return Task.FromResult(col.FindById(id));
+        }
+
+        public Task<T> get(Guid id)
+        {
+            using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
+            var col = db.GetCollection<T>();
+            return Task.FromResult(col.FindById(id));
         }
 
         public async IAsyncEnumerable<T> search(Query<T> query)

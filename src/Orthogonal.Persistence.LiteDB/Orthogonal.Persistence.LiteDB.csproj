@@ -5,13 +5,13 @@
     <Authors>Hao Wang</Authors>
     <Company>Hao Wang</Company>
     <Product>Orthogonal Framework</Product>
-    <Version>1.0.2</Version>
-    <PackageReleaseNotes>Repository Search by ILiteQueryable</PackageReleaseNotes>
+    <Version>1.1.0</Version>
+    <PackageReleaseNotes>Added Repository.Get(Guid id)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="LiteDB" Version="5.0.10" />
-    <PackageReference Include="Orthogonal.Persistence" Version="1.0.0" />
+    <PackageReference Include="Orthogonal.Persistence" Version="1.1.0" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
   </ItemGroup>
 
