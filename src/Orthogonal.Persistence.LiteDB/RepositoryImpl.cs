@@ -7,29 +7,30 @@ namespace Orthogonal.Persistence.LiteDB
 {
     public class RepositoryImpl<T> : Repository<T>
     {
-        private LiteDBClientConfiguration configuration;
+        private string connection_string;
         public RepositoryImpl(LiteDBClientConfiguration configuration)
         {
-            this.configuration = configuration;
+            connection_string =
+                $"FileName={configuration.DatabaseLoclation};Connection=shared;ReadOnly={configuration.ReadOnly}";
         }
 
         public Task<T> get(string id)
         {
-            using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
+            using var db = new LiteDatabase(connection_string);
             var col = db.GetCollection<T>();
             return Task.FromResult(col.FindById(id));
         }
 
         public Task<T> get(Guid id)
         {
-            using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
+            using var db = new LiteDatabase(connection_string);
             var col = db.GetCollection<T>();
             return Task.FromResult(col.FindById(id));
         }
 
         public async IAsyncEnumerable<T> search(Query<T> query)
         {
-            using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
+            using var db = new LiteDatabase(connection_string);
             var col = db.GetCollection<T>();
             IEnumerable<T> result;
             switch (query)
@@ -59,7 +60,7 @@ namespace Orthogonal.Persistence.LiteDB
         {
             await Task.Run(() =>
            {
-               using var db = new LiteDatabase($"FileName={configuration.DatabaseLoclation};Connection=shared");
+               using var db = new LiteDatabase(connection_string);
                var col = db.GetCollection<T>();
                col.Upsert(entity);
            });
