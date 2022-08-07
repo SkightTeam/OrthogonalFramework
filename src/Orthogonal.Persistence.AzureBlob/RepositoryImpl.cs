@@ -38,9 +38,15 @@ namespace Orthogonal.Persistence.AzureBlob
         public async Task<T> get(string id)
         {
             var containerClient = BlobServiceClient.GetBlobContainerClient(blob_name);
+            if (!containerClient.Exists().Value) return default;
             var blobClient = containerClient.GetBlobClient(id);
             var download = await blobClient.DownloadAsync();
             return await JsonSerializer.DeserializeAsync<T>(download.Value.Content);
+        }
+
+        public async Task<T> get(Guid id)
+        {
+            return await get(id.ToString());
         }
 
         public IAsyncEnumerable<T> search(Query<T> query)
@@ -79,7 +85,7 @@ namespace Orthogonal.Persistence.AzureBlob
             {
                 await JsonSerializer.SerializeAsync(stream, data);
                 stream.Position = 0;
-                await blobClient.UploadAsync(stream);
+                await blobClient.UploadAsync(stream,true);
             }
         }
 
