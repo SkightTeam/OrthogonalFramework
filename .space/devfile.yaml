@@ -5,3 +5,4 @@ attributes:
       instanceType: large
       editor:
         type: Rider
+      projectRoot: src/OrthogonalFramework.sln
