@@ -1,0 +1,7 @@
+schemaVersion: 2.2.0
+attributes:
+    space:
+      # regular, large, xlarge
+      instanceType: large
+      editor:
+        type: Rider
