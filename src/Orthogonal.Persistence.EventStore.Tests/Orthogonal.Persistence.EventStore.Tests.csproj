@@ -1,14 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;netstandard2.1;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="5.10.3" />
     <PackageReference Include="Machine.Fakes.NSubstitute" Version="2.11.0" />
     <PackageReference Include="Machine.Specifications" Version="1.0.0" />
-    <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.10.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
   </ItemGroup>
 
