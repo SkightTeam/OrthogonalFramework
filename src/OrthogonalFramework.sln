@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29911.84
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence", "Orthogonal.Persistence\Orthogonal.Persistence.csproj", "{BDCC5455-97A3-47C8-A062-1BFA5B943121}"
 EndProject
@@ -24,7 +24,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.Lite
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.LiteDB.Tests", "Orthogonal.Persistence.LiteDB.Tests\Orthogonal.Persistence.LiteDB.Tests.csproj", "{C2CF6BCF-65D3-4324-AC9D-338D7FA6C831}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.Marten", "Orthogonal.Persistence.Marten\Orthogonal.Persistence.Marten.csproj", "{6953EFC3-4E24-409F-8645-B9E95151DE74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.Marten", "Orthogonal.Persistence.Marten\Orthogonal.Persistence.Marten.csproj", "{6953EFC3-4E24-409F-8645-B9E95151DE74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.AzureTable", "Orthogonal.Persistence.AzureTable\Orthogonal.Persistence.AzureTable.csproj", "{ED740484-BA29-4AD6-8000-A8D37E90EC18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.AzureTable.Tests", "Orthogonal.Persistence.AzureTable.Tests\Orthogonal.Persistence.AzureTable.Tests.csproj", "{C38E2579-E3D0-444C-8EB7-0476B87D0860}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +72,14 @@ Global
 		{6953EFC3-4E24-409F-8645-B9E95151DE74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6953EFC3-4E24-409F-8645-B9E95151DE74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6953EFC3-4E24-409F-8645-B9E95151DE74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED740484-BA29-4AD6-8000-A8D37E90EC18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED740484-BA29-4AD6-8000-A8D37E90EC18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED740484-BA29-4AD6-8000-A8D37E90EC18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED740484-BA29-4AD6-8000-A8D37E90EC18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C38E2579-E3D0-444C-8EB7-0476B87D0860}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C38E2579-E3D0-444C-8EB7-0476B87D0860}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C38E2579-E3D0-444C-8EB7-0476B87D0860}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C38E2579-E3D0-444C-8EB7-0476B87D0860}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
