@@ -26,9 +26,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.Lite
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.Marten", "Orthogonal.Persistence.Marten\Orthogonal.Persistence.Marten.csproj", "{6953EFC3-4E24-409F-8645-B9E95151DE74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.AzureTable", "Orthogonal.Persistence.AzureTable\Orthogonal.Persistence.AzureTable.csproj", "{ED740484-BA29-4AD6-8000-A8D37E90EC18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.AzureTable", "Orthogonal.Persistence.AzureTable\Orthogonal.Persistence.AzureTable.csproj", "{ED740484-BA29-4AD6-8000-A8D37E90EC18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.AzureTable.Tests", "Orthogonal.Persistence.AzureTable.Tests\Orthogonal.Persistence.AzureTable.Tests.csproj", "{C38E2579-E3D0-444C-8EB7-0476B87D0860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.AzureTable.Tests", "Orthogonal.Persistence.AzureTable.Tests\Orthogonal.Persistence.AzureTable.Tests.csproj", "{C38E2579-E3D0-444C-8EB7-0476B87D0860}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orthogonal.Persistence.AzureEventHub", "Orthogonal.Persistence.AzureEventHub\Orthogonal.Persistence.AzureEventHub.csproj", "{57C17C83-0D55-485F-AE67-4AA3834B37D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orthogonal.Persistence.AzureEventHub.Tests", "Orthogonal.Persistence.AzureEventHub.Tests\Orthogonal.Persistence.AzureEventHub.Tests.csproj", "{0A4BB757-634A-43AF-B595-C89890926D15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -80,6 +84,14 @@ Global
 		{C38E2579-E3D0-444C-8EB7-0476B87D0860}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C38E2579-E3D0-444C-8EB7-0476B87D0860}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C38E2579-E3D0-444C-8EB7-0476B87D0860}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57C17C83-0D55-485F-AE67-4AA3834B37D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57C17C83-0D55-485F-AE67-4AA3834B37D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57C17C83-0D55-485F-AE67-4AA3834B37D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57C17C83-0D55-485F-AE67-4AA3834B37D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A4BB757-634A-43AF-B595-C89890926D15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A4BB757-634A-43AF-B595-C89890926D15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A4BB757-634A-43AF-B595-C89890926D15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A4BB757-634A-43AF-B595-C89890926D15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
