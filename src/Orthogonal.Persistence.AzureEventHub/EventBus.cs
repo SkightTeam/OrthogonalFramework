@@ -133,6 +133,7 @@ namespace Orthogonal.Persistence.AzureEventHub
             return Task.CompletedTask;
         }
 
+
         public void register(EventHandler handler)
         {
             var genericHandler = typeof(CQRS.EventHandler<>);

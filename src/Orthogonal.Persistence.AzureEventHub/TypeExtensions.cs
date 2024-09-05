@@ -19,7 +19,8 @@ namespace Orthogonal.Persistence.AzureEventHub
             {
                 Properties =
                 {
-                    { "EventType", data.GetType().AssemblyQualifiedName },
+                    {"AssemblyQualifiedName ", data.GetType().AssemblyQualifiedName },
+                    {"TypeFullName", data.GetType().FullName},
                     { "SourceId", data.SourceId }
                 }
             };
@@ -29,7 +30,7 @@ namespace Orthogonal.Persistence.AzureEventHub
         public static object extract_data(this EventData event_data)
         {
             var type = typeof(object);
-            if (event_data.Properties.TryGetValue("EventType", out var typeName))
+            if (event_data.Properties.TryGetValue("AssemblyQualifiedName", out var typeName))
             {
                 type = Type.GetType(typeName.ToString());
                 
